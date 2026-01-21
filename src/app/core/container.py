@@ -3,6 +3,7 @@ from src.app.factories.engine_factory import EngineFactory
 from src.app.schemas.requests import EngineType
 from src.app.services.generator_service import GeneratorService
 from src.app.engines.mermaid_playwright import MermaidPlaywrightEngine
+from src.app.engines.kokoro_engine import KokoroEngine
 
 # This file acts as a manual Dependency Injection (DI) container.
 # In a larger application, a framework like `dependency-injector` might be
@@ -16,6 +17,7 @@ from src.app.engines.mermaid_playwright import MermaidPlaywrightEngine
 #    configured and injected here.
 html_playwright_engine = HtmlPlaywrightEngine()
 mermaid_engine = MermaidPlaywrightEngine()
+kokoro_engine = KokoroEngine()
 
 
 # 2. Create a singleton instance of the EngineFactory.
@@ -30,6 +32,7 @@ engine_factory.register_engine(EngineType.HTML, html_playwright_engine)
 # mermaid_engine = MermaidCliEngine()
 # engine_factory.register_engine(EngineType.MERMAID, mermaid_engine)
 engine_factory.register_engine(EngineType.MERMAID, mermaid_engine)
+engine_factory.register_engine(EngineType.KOKORRO_TTS, kokoro_engine)
 
 # 4. Create a singleton instance of the GeneratorService, injecting its
 #    dependency (the factory).

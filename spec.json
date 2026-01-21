@@ -1,0 +1,91 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Render Engine API",
+    "description": "API for converting HTML/CSS/JS code into pixel-perfect PNG images.",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8000"
+    }
+  ],
+  "paths": {
+    "/api/v1/generate": {
+      "post": {
+        "summary": "Generate Image",
+        "description": "Takes HTML/CSS code and returns a rendered PNG screenshot.",
+        "operationId": "generateImage",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GenerateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "image/png": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "GenerateRequest": {
+        "type": "object",
+        "properties": {
+          "engine_type": {
+            "type": "string",
+            "enum": ["html"],
+            "default": "html",
+            "description": "The rendering engine to use."
+          },
+          "source_code": {
+            "type": "string",
+            "description": "The full HTML/CSS/JS string to render. Can include <style> and <script> tags."
+          },
+          "options": {
+            "$ref": "#/components/schemas/RenderOptions"
+          }
+        },
+        "required": ["source_code"]
+      },
+      "RenderOptions": {
+        "type": "object",
+        "properties": {
+          "width": {
+            "type": "integer",
+            "default": 1080,
+            "description": "Viewport width in pixels."
+          },
+          "height": {
+            "type": "integer",
+            "default": 1920,
+            "description": "Viewport height in pixels."
+          },
+          "device_scale_factor": {
+            "type": "integer",
+            "default": 2,
+            "description": "Pixel density (1 for standard, 2 for Retina/High-Res)."
+          }
+        }
+      }
+    }
+  }
+}
