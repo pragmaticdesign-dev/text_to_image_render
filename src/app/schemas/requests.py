@@ -15,6 +15,7 @@ class RenderOptions(BaseModel):
     width: int = Field(1024, description="The width of the output image in pixels.")
     height: int = Field(768, description="The height of the output image in pixels.")
     scale_factor: float = Field(1.0, description="The device scale factor for HiDPI rendering.")
+    omit_background: bool = Field(False, description="If True, removes the default white background for transparency.")
     # --- Audio Options ---
     voice: str = Field("af_heart", description="Voice ID for Kokoro TTS (e.g., 'af_heart', 'am_adam').")
     speed: float = Field(1.0, description="Audio playback speed (default: 1.0).")

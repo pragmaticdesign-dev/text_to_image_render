@@ -1,15 +1,23 @@
 import requests
 import json
-import base64
 
-# Configuration
 API_URL = "http://localhost:8000/api/v1/generate"
-OUTPUT_FILE = "array_visual.png"
 
-# 1. Define the Visual (The "Source Code")
-# We use Tailwind CSS classes because your engine injects Tailwind.
-html_payload = """
-<div class="h-screen w-screen bg-slate-900 flex flex-col items-center justify-center font-sans text-white">
+def run_test(name, filename, payload):
+    print(f"Testing {name}...")
+    try:
+        response = requests.post(API_URL, json=payload)
+        response.raise_for_status()
+        with open(filename, "wb") as f:
+            f.write(response.content)
+        print(f"✅ Saved to {filename}")
+    except Exception as e:
+        print(f"❌ Failed: {e}")
+
+# 1. Image WITH Background
+payload_bg = {
+    "engine_type": "html",
+    "source_code": """<div class="h-screen w-screen bg-slate-900 flex flex-col items-center justify-center font-sans text-white">
     
     <h1 class="text-6xl font-bold mb-20 text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500">
         Python Array
@@ -49,30 +57,25 @@ html_payload = """
     </div>
 
 </div>
-"""
-
-# 2. Construct the Request Data
-payload = {
-    "engine_type": "html",
-    "source_code": html_payload,
-    "options": {
-        "width": 1080,
-        "height": 1920,
-        "device_scale_factor": 2  # Retina quality
-    }
+""",
+    "options": { "width": 1080, "height": 1920, "omit_background": False }
 }
 
-try:
-    print(f"Sending request to {API_URL}...")
-    response = requests.post(API_URL, json=payload)
+# 2. Image WITHOUT Background (Transparent)
+payload_trans = {
+    "engine_type": "html",
+    "source_code": "<h1 class='text-6xl text-red-500 font-bold'>Transparent</h1>",
+    "options": { "width": 500, "height": 300, "omit_background": True }
+}
 
-    if response.status_code == 200:
-        # 3. Save the Image
-        with open(OUTPUT_FILE, "wb") as f:
-            f.write(response.content)
-        print(f"✅ Success! Image saved to: {OUTPUT_FILE}")
-    else:
-        print(f"❌ Error {response.status_code}: {response.text}")
+# 3. Voice Generation
+payload_voice = {
+    "engine_type": "kokorro",
+    "source_code": "System check complete. Transparency enabled.",
+    "options": { "voice": "af_heart", "speed": 1.0 }
+}
 
-except requests.exceptions.ConnectionError:
-    print(f"❌ Could not connect to {API_URL}. Is the server running?")
+if __name__ == "__main__":
+    run_test("Image (With BG)", "test_bg.png", payload_bg)
+    run_test("Image (Transparent)", "test_transparent.png", payload_trans)
+    run_test("Voice", "test_voice.wav", payload_voice) # or .mp3

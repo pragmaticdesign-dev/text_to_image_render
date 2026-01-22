@@ -99,7 +99,25 @@ curl -X 'POST' \
 
 ```
 
-#### 2. Generate Audio (TTS)
+
+#### 2. Generate Transparent Images
+You can generate images with transparent backgrounds by setting omit_background: true in the options. In this mode, the engine ignores the fixed viewport size and instead performs a tight crop around the content, ensuring the output image is exactly the size of your element without any surrounding whitespace.
+
+```bash
+curl -X 'POST' \
+  'http://localhost:8000/api/v1/generate' \
+  -H 'Content-Type: application/json' \
+  -d '{
+  "engine_type": "html",
+  "source_code": "<div class=\"text-6xl font-black text-red-500 border-4 border-red-500 p-4 rounded-xl\">Transparent Mode</div>",
+  "options": {
+    "width": 1000,
+    "height": 1000,
+    "omit_background": true
+  }
+}'
+```
+#### 3. Generate Audio (TTS)
 
 ```bash
 curl -X 'POST' \
@@ -116,6 +134,7 @@ curl -X 'POST' \
 
 ```
 
+
 ### Payload Fields
 
 * `engine_type`: The engine to use. Options: `"html"`, `"mermaid"`, `"kokorro"`.
@@ -125,6 +144,8 @@ curl -X 'POST' \
 * `width`: Viewport width (default: 1024)
 * `height`: Viewport height (default: 768)
 * `scale_factor`: Pixel density (default: 1.0)
+* `omit_background`: emit bacground an crop to the elements
+
 
 
 * **Audio Options:**
