@@ -19,20 +19,19 @@ class HtmlPlaywrightEngine(BaseRenderingEngine):
                 )
 
                 # LOGIC BRANCH:
-                # If transparent -> Wrap in inline-block to shrink-wrap the content.
-                # If background -> Use standard full-width/height body.
+                # 1. Transparent + Tight Crop -> Wrap in inline-block to shrink-wrap.
+                # 2. Transparent + Full Size  -> Use standard full-width body.
+                # 3. Background Mode          -> Use standard full-width body.
                 
-                if options.omit_background:
+                if options.omit_background and options.tight_crop:
                     # TIGHT CROP MODE (Transparent)
-                    # We wrap content in a div that shrinks to fit.
                     html_content = f"""
                     <div id="snapshot-target" style="display: inline-block; max-width: 100%;">
                         {source_code}
                     </div>
                     """
                 else:
-                    # CANVAS MODE (With Background)
-                    # We use the raw source code so it fills the viewport as intended.
+                    # CANVAS MODE (With Background OR Transparent Full Page)
                     html_content = source_code
 
                 full_html = f"""
@@ -55,11 +54,15 @@ class HtmlPlaywrightEngine(BaseRenderingEngine):
                 await page.set_content(full_html, wait_until="networkidle")
 
                 if options.omit_background:
-                    # 1. Transparent: Screenshot ONLY the element (tight crop)
-                    element = page.locator("#snapshot-target")
-                    return await element.screenshot(type="png", omit_background=True)
+                    if options.tight_crop:
+                        # 1. Transparent Crop: Screenshot ONLY the element
+                        element = page.locator("#snapshot-target")
+                        return await element.screenshot(type="png", omit_background=True)
+                    else:
+                        # 2. Transparent Full: Screenshot FULL PAGE with transparency
+                        return await page.screenshot(type="png", omit_background=True)
                 else:
-                    # 2. Background: Screenshot the FULL PAGE (fixed size)
+                    # 3. Background: Screenshot FULL PAGE (fixed size)
                     return await page.screenshot(type="png")
 
             finally:

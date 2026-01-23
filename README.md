@@ -101,7 +101,11 @@ curl -X 'POST' \
 
 
 #### 2. Generate Transparent Images
-You can generate images with transparent backgrounds by setting omit_background: true in the options. In this mode, the engine ignores the fixed viewport size and instead performs a tight crop around the content, ensuring the output image is exactly the size of your element without any surrounding whitespace.
+
+You have two options when generating transparent images: **Tight Crop** (default) or **Full Viewport**.
+
+**Option A: Tight Crop (Default)**
+By setting `omit_background: true`, the engine defaults to `tight_crop: true`. It ignores the fixed viewport size and shrinks the canvas to fit the content exactly.
 
 ```bash
 curl -X 'POST' \
@@ -109,11 +113,28 @@ curl -X 'POST' \
   -H 'Content-Type: application/json' \
   -d '{
   "engine_type": "html",
-  "source_code": "<div class=\"text-6xl font-black text-red-500 border-4 border-red-500 p-4 rounded-xl\">Transparent Mode</div>",
+  "source_code": "<div class=\"text-6xl text-red-500 border-4 border-red-500 p-4 rounded-xl\">Tight Crop</div>",
   "options": {
-    "width": 1000,
-    "height": 1000,
     "omit_background": true
+  }
+}'
+```
+
+##### Option B: 
+Full Viewport Transparency If you need to maintain the exact width and height (e.g., for a 1920x1080 overlay) but keep the background transparent, set tight_crop: false.
+
+```bash
+curl -X 'POST' \
+  'http://localhost:8000/api/v1/generate' \
+  -H 'Content-Type: application/json' \
+  -d '{
+  "engine_type": "html",
+  "source_code": "<h1 class=\"text-6xl text-green-500\">Full Viewport Overlay</h1>",
+  "options": {
+    "width": 1920,
+    "height": 1080,
+    "omit_background": true,
+    "tight_crop": false
   }
 }'
 ```
