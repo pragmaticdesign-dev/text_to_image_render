@@ -8,7 +8,6 @@ from src.app.schemas.requests import RenderOptions
 class KokoroEngine(BaseRenderingEngine):
     def __init__(self, lang_code='a'):
         print("Initializing Kokoro TTS pipeline...")
-        # Initialize once to keep it hot in memory
         self.pipeline = KPipeline(lang_code=lang_code, repo_id='hexgrad/Kokoro-82M')
         self.sample_rate = 24000
         print("Kokoro Initialization complete.")
@@ -24,20 +23,29 @@ class KokoroEngine(BaseRenderingEngine):
         )
 
     async def render(self, source_code: str, options: RenderOptions) -> bytes:
-        # source_code is the input text
+        # Split text into lines
         lines = [line.strip() for line in source_code.split('\n') if line.strip()]
         
         combined_audio = AudioSegment.empty()
-        silence = AudioSegment.silent(duration=500)  # 500ms gap
+        
+        # A small breath between sentences (optional, can be 0 if you want)
+        # This ONLY plays between Line A and Line B.
+        sentence_gap = AudioSegment.silent(duration=50) 
 
-        for line in lines:
+        for i, line in enumerate(lines):
             generator = self.pipeline(line, voice=options.voice, speed=options.speed)
             line_chunks = [audio for _, _, audio in generator]
 
             if line_chunks:
                 full_line_numpy = np.concatenate(line_chunks)
                 segment = self._numpy_to_audiosegment(full_line_numpy)
-                combined_audio += segment + silence
+                
+                # 1. Add the spoken audio
+                combined_audio += segment
+                
+                # 2. LOGIC CHECK: Only add gap if this is NOT the last line
+                if i < len(lines) - 1:
+                    combined_audio += sentence_gap
 
         # Export to in-memory bytes buffer
         buffer = io.BytesIO()
